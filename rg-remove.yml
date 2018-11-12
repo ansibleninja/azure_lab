@@ -5,6 +5,6 @@
 
     - name: Remove a resource
       azure_rm_resourcegroup:
-        name: table6fyansibletest
+        name: {{ rg_name }}
         location: koreacentral
         state: absent
