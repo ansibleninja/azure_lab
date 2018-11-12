@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Remove a resource
+      azure_rm_resourcegroup:
+        name: table6fyansiblerg
+        location: koreacentral
+        state: absent
+        force: yes
