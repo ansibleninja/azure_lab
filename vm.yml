@@ -1,25 +1,32 @@
-- name: Create  VM
+---
+name: Create  VM
   hosts: localhost
   connection: local
+  vars:
+    resource_group: table6fyansiblerg
+    vnet: table6fyansibleVnet
+    sg_name: table6fyansibleSecGr
+    subnet_name: table6fyansibleSubnet
+    nic_name: table6fyansibleNIC
   tasks:
   - name: Create resource group
     azure_rm_resourcegroup:
-      name: table6fyansiblerg
+      name: "{{ resource_group }}"
       location: koreacentral
   - name: Create virtual network
     azure_rm_virtualnetwork:
-      resource_group: table6fyansiblerg
-      name: table6fyansibleVnet
+      resource_group: "{{ resource_group }}"
+      name: "{{ vnet }}"
       address_prefixes: "10.0.0.0/16"
   - name: Add subnet
     azure_rm_subnet:
-      resource_group: table6fyansiblerg
-      name: table6fyansibleSubnet
+      resource_group: "{{ resource_group }}"
+      name: "{{ subnet_name }}"
       address_prefix: "10.0.1.0/24"
-      virtual_network: table6fyansibleVnet
+      virtual_network: "{{ vnet }}"
   - name: Create public IP address
     azure_rm_publicipaddress:
-      resource_group: table6fyansiblerg
+      resource_group: "{{ resource_group }}"
       allocation_method: Static
       name: table6fyansiblePubIP
     register: output_ip_address
@@ -28,8 +35,8 @@
       msg: "Public IP is {{ output_ip_address.state.ip_address }}."
   - name: Create Network Security Group that allows SSH
     azure_rm_securitygroup:
-      resource_group: table6fyansiblerg
-      name: table6fyansibleSecGr
+      resource_group: "{{ resource_group }}"
+      name: "{{ sg_name }}"
       rules:
         - name: SSH
           protocol: Tcp
@@ -39,15 +46,15 @@
           direction: Inbound
   - name: Create virtual network inteface card
     azure_rm_networkinterface:
-      resource_group: table6fyansiblerg
-      name: table6fyansibleNIC
-      virtual_network: table6fyansibleVnet
-      subnet: table6fyansibleSubnet
+      resource_group: "{{ resource_group }}"
+      name: "{{ nic_name }}"
+      virtual_network: "{{ vnet }}"
+      subnet: "{{ subnet_name }}"
       public_ip_name: table6fyansiblePubIP
-      security_group: table6fyansibleSecGr
+      security_group: "{{ sg_name }}"
   - name: Create VM
     azure_rm_virtualmachine:
-      resource_group: table6fyansiblerg
+      resource_group: "{{ resource_group }}"
       name: table6fyansiblevm
       vm_size: Standard_DS1_v2
       admin_username: azureops
@@ -56,7 +63,7 @@
         - path: /home/azureops/.ssh/authorized_keys
           key_data: |
             {{ lookup('file','/home/azureops/.ssh/id_rsa.pub') }}
-      network_interfaces: table6fyansibleNIC
+      network_interfaces: "{{ nic_name }}"
       image:
         offer: UbuntuServer
         publisher: Canonical
