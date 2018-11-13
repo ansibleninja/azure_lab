@@ -2,31 +2,27 @@
 - name: Create  VM
   hosts: localhost
   connection: local
-  vars:
-    resource_group: table6fyansiblerg
-    vnet: table6fyansibleVnet
-    sg_name: table6fyansibleSecGr
-    subnet_name: table6fyansibleSubnet
-    nic_name: table6fyansibleNIC
+  vars_files:
+    - vars.yml
   tasks:
   - name: Create resource group
     azure_rm_resourcegroup:
-      name: "{{ resource_group }}"
+      name: "{{ group_name }}"
       location: koreacentral
   - name: Create virtual network
     azure_rm_virtualnetwork:
-      resource_group: "{{ resource_group }}"
+      resource_group: "{{ group_name }}"
       name: "{{ vnet }}"
       address_prefixes: "10.0.0.0/16"
   - name: Add subnet
     azure_rm_subnet:
-      resource_group: "{{ resource_group }}"
+      resource_group: "{{ group_name }}"
       name: "{{ subnet_name }}"
       address_prefix: "10.0.1.0/24"
       virtual_network: "{{ vnet }}"
   - name: Create public IP address
     azure_rm_publicipaddress:
-      resource_group: "{{ resource_group }}"
+      resource_group: "{{ group_name }}"
       allocation_method: Static
       name: table6fyansiblePubIP
     register: output_ip_address
@@ -35,8 +31,8 @@
       msg: "Public IP is {{ output_ip_address.state.ip_address }}."
   - name: Create Network Security Group that allows SSH
     azure_rm_securitygroup:
-      resource_group: "{{ resource_group }}"
-      name: "{{ sg_name }}"
+      resource_group: "{{ group_name }}"
+      name: "{{ nsg_name }}"
       rules:
         - name: SSH
           protocol: Tcp
@@ -46,15 +42,15 @@
           direction: Inbound
   - name: Create virtual network inteface card
     azure_rm_networkinterface:
-      resource_group: "{{ resource_group }}"
+      resource_group: "{{ group_name }}"
       name: "{{ nic_name }}"
       virtual_network: "{{ vnet }}"
       subnet: "{{ subnet_name }}"
       public_ip_name: table6fyansiblePubIP
-      security_group: "{{ sg_name }}"
+      security_group: "{{ nsg_name }}"
   - name: Create VM
     azure_rm_virtualmachine:
-      resource_group: "{{ resource_group }}"
+      resource_group: "{{ group_name }}"
       name: table6fyansiblevm
       vm_size: Standard_DS1_v2
       admin_username: azureops
