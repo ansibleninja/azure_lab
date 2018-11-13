@@ -1,0 +1,19 @@
+---
+- name: Install apache and open firewall
+  hosts: localhost
+  connection: local 
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Create Network Security Group that allows HTTP 
+      azure_rm_securitygroup:
+        resource_group: "{{ group_name }}"
+        name: "{{ nsg_name }}"
+        rules:
+          - name: HTTP
+            protocol: Tcp
+            destination_port_range: 80
+            access: Allow
+            priority: 1002
+            direction: Inbound
+
