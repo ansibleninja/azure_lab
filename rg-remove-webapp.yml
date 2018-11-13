@@ -8,3 +8,4 @@
         name: table6fy_devopswebrg
         location: koreacentral
         state: absent
+        force: yes
