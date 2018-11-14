@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  connection: local
+  tasks:
+
+#    - name: Create a resource
+#      azure_rm_resourcegroup:
+#        name: table6fywebapprg2
+#        location: koreacentral
+#        tags:
+#          testing: testing
+#          delete: never
+    - name: Arm Deploy
+      azure_rm_deployment:
+        location: koreacentral
+        state: present
+        resource_group_name: table6fywebapprg2
+        template_link: 'https://raw.githubusercontent.com/ansibleninja/arm/master/template.json'
+        parameters_link: 'https://raw.githubusercontent.com/ansibleninja/arm/master/parameters.json'

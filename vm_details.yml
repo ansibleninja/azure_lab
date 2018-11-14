@@ -15,7 +15,7 @@
   azure_rm_publicipaddress:
     resource_group: "{{ group_name }}"
     allocation_method: Static
-    name: "{{prefix}}{{vm.tag}}PubIP"
+    name: "{{prefix}}{{vm.name}}PubIP"
   register: output_ip_address
 - name: Output public IP
   debug: 
@@ -23,15 +23,15 @@
 - name: Create virtual network inteface card
   azure_rm_networkinterface:
     resource_group: "{{ group_name }}"
-    name: "{{ nic_name }}{{vm.tag}}"
+    name: "{{ nic_name }}{{vm.name}}"
     virtual_network: "{{ vnet }}"
     subnet: "{{ subnet_name }}"
-    public_ip_name: "{{prefix}}{{vm.tag}}PubIP"
+    public_ip_name: "{{prefix}}{{vm.name}}PubIP"
     security_group: "{{ nsg_name }}"
 - name: Create VM
   azure_rm_virtualmachine:
     resource_group: "{{ group_name }}"
-    name: "{{prefix}}{{vm.tag}}vm"
+    name: "{{prefix}}{{vm.name}}vm"
     vm_size: Standard_DS1_v2
     admin_username: azureops
     ssh_password_enabled: false
@@ -39,7 +39,7 @@
       - path: /home/azureops/.ssh/authorized_keys
         key_data: |
           {{ lookup('file','/home/azureops/.ssh/id_rsa.pub') }}
-    network_interfaces: "{{ nic_name }}{{vm.tag}}"
+    network_interfaces: "{{ nic_name }}{{vm.name}}"
     image:
       offer: UbuntuServer
       publisher: Canonical
@@ -47,3 +47,15 @@
       version: latest
     tags:
       machine_role: "{{vm.tag}}"
+
+- name: Create Hosts
+  add_host:
+    name: "{{prefix}}{{vm.name}}vm"
+    ansible_user: azureops
+    ansible_host: "{{output_ip_address.state.ip_address}}"
+    groups:
+      - "{{vm.tag}}"
+
+#- include_tasks: apache.yml
+#- include_tasks: haproxy.yml
+

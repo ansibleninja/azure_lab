@@ -1,5 +1,10 @@
-host1 ansible_host=52.231.67.168 ansible_user=azureops
-host2 ansible_host=52.231.74.72 ansible_user=azureops
+host1 ansible_host=52.231.70.102 ansible_user=azureops
+host2 ansible_host=52.231.67.168 ansible_user=azureops
+host3 ansible_host=52.231.71.0 ansilbe_user=azureops
 
 [web]
 host2
+host3
+
+[haproxy]
+host1
